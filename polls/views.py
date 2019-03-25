@@ -1,8 +1,9 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,JsonResponse
 from django.shortcuts import render,get_object_or_404
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+
 
 from .models import Question,Choice
 
@@ -34,3 +35,15 @@ def vote(request, question_id):
         selected_choice.votes += 1
         selected_choice.save()
         return HttpResponseRedirect(reverse('polls:results',args=(question_id,)))
+
+def polls_list(request):
+    MAX_OBJECTS = 20
+    questions = Question.objects.all()[:MAX_OBJECTS]
+    data = {'data':list(questions.values('id','pub_date','question_text'))}
+    return JsonResponse(data)
+
+def poll_detail(request,pk):
+    question = get_object_or_404(Question, pk=pk)  # 获取对象实例或返回404状态
+    data = {'pub_date':question.pub_date,
+            'question_text':question.question_text}
+    return JsonResponse(data)
